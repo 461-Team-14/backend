@@ -1,0 +1,52 @@
+name: Deploy to Cloud Run from Source
+
+on:
+  push:
+    branches: [ "master", "main", "cicd"]
+
+env:
+  PROJECT_ID: projectteam14 # TODO: update Google Cloud project id
+  SERVICE: githubactions # TODO: update Cloud Run service name
+  REGION: us-east1 # TODO: update Cloud Run service region
+
+jobs:
+  Auth:
+    # Add 'id-token' with the intended permissions for workload identity federation
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup Node.js (NPM)
+        uses: actions/setup-node@master
+        with:
+          node-version: '18.x'
+
+      - name: Build Development
+        run: cd my-react-app; npm install
+
+      - name: Build Development
+        run: cd my-react-app; npm run build
+
+      - name: Google Auth
+        id: auth
+        uses: 'google-github-actions/auth@v0'
+        with:
+          credentials_json: '${{ secrets.JSON_CRED }}' 
+
+      - name: Deploy to App Engine
+        id: deploy
+        uses: google-github-actions/deploy-appengine@v0.2.0
+        with:
+          deliverables: app.yaml cron.yaml
+          version: v1
+          project_id: ${{ secrets.PROJECT }}
+          credentials: ${{ secrets.JSON_CRED }}
+
+      - name: Test
+        run: curl "${{ steps.deploy.outputs.url }}"
