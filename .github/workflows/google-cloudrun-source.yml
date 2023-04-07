@@ -31,7 +31,7 @@ jobs:
         run: cd nodejs-server; npm install
 
       - name: Build Development
-        run: cd nodejs-server; npm run build
+        run: cd nodejs-server; npm start
 
       - name: Google Auth
         id: auth
