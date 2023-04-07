@@ -5,7 +5,7 @@ on:
     branches: [ "master", "main", "cicd"]
 
 env:
-  PROJECT_ID: projectteam14 # TODO: update Google Cloud project id
+  PROJECT_ID: backend-382721 # TODO: update Google Cloud project id
   SERVICE: githubactions # TODO: update Cloud Run service name
   REGION: us-east1 # TODO: update Cloud Run service region
 
@@ -28,10 +28,10 @@ jobs:
           node-version: '18.x'
 
       - name: Build Development
-        run: cd my-react-app; npm install
+        run: cd nodejs-server; npm install
 
       - name: Build Development
-        run: cd my-react-app; npm run build
+        run: cd nodejs-server; npm run build
 
       - name: Google Auth
         id: auth
