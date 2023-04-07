@@ -1,10 +1,6 @@
 runtime: nodejs18
+env: standard
+
 handlers:
-# Serve all static files with url ending with a file extension
-- url: /(.*\..+)$
-  static_files: nodejs-server/build/\1
-  upload: nodejs-server/build/(.*\..+)$
-# Catch all handler to index.html
-- url: /.*
-  static_files: nodejs-server/build/index.html
-  upload: nodejs-server/build/index.html
+- url: nodejs-server/.*
+  script: auto
