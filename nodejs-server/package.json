@@ -17,6 +17,8 @@
     "js-yaml": "^3.3.0",
     "json-refs": "^3.0.15",
     "jsonwebtoken": "^9.0.0",
-    "oas3-tools": "^2.2.3"
+    "nexe": "^4.0.0-rc.2",
+    "oas3-tools": "^2.2.3",
+    "pkg": "^5.8.1"
   }
 }
