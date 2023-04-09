@@ -45,7 +45,7 @@ module.exports.PackageByRegExGet = function packageByRegExGet (req, res, next, b
       utils.writeJson(res, response);
     })
     .catch(function (response) {
-      utils.writeJson(res, response);
+      utils.writeJson(res, response.status || 500, response);
     });
 };
 
