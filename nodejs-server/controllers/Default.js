@@ -38,9 +38,9 @@ module.exports.packageByNameGet = function packageByNameGet (req, res, next, nam
     });
 };
 
-module.exports.packageByRegExGet = function packageByRegExGet (req, res, next, body, regex, xAuthorization) {
+module.exports.PackageByRegExGet = function packageByRegExGet (req, res, next, body, xAuthorization) {
   xAuthorization = req.headers['x-authorization']; // Assign token from request header to global variable
-  Default.packageByRegExGet(body, regex, xAuthorization)
+  Default.packageByRegExGet(body, xAuthorization)
     .then(function (response) {
       utils.writeJson(res, response);
     })
@@ -93,7 +93,7 @@ module.exports.packageRetrieve = function packageRetrieve (req, res, next, id, x
     });
 };
 
-module.exports.packageUpdate = function packageUpdate (req, res, next, body, id, xAuthorization) {
+module.exports.PackageUpdate = function packageUpdate (req, res, next, body, id, xAuthorization) {
   xAuthorization = req.headers['x-authorization']; // Assign token from request header to global variable
   Default.packageUpdate(body, id, xAuthorization)
     .then(function (response) {

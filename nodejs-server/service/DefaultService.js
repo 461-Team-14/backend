@@ -115,27 +115,33 @@ exports.packageByNameGet = function(name,xAuthorization) {
  * Get any packages fitting the regular expression.
  * Search for a package using regular expression over package names and READMEs. This is similar to search by name.
  *
- * body String 
- * regex PackageRegEx 
+ * body PackageRegEx 
  * xAuthorization AuthenticationToken  (optional)
  * returns List
  **/
-exports.packageByRegExGet = function(body,regex,xAuthorization) {
+exports.packageByRegExGet = function(body, xAuthorization) {
   return new Promise(function(resolve, reject) {
-    var examples = {};
-    examples['application/json'] = [ {
-  "Version" : "1.2.3",
-  "ID" : "ID",
-  "Name" : "Name"
-}, {
-  "Version" : "1.2.3",
-  "ID" : "ID",
-  "Name" : "Name"
-} ];
-    if (Object.keys(examples).length > 0) {
-      resolve(examples[Object.keys(examples)[0]]);
+    if (!body) {
+      reject({ status: 400, message: "The regex field is missing in the PackageRegEx." });
+    }
+
+    //Filter the packageList array based on the regex provided
+    var filteredList = PackageHandler.packageList.filter(function(pkg) {
+      return (new RegExp(body, 'i')).test(pkg.Name) || (pkg.Readme && (new RegExp(body, 'i')).test(pkg.Readme));
+    });
+
+    //Create an array of package objects from the filteredList
+    var foundPackages = filteredList.map(function(pkg) {
+      return {
+        Version: pkg.Version,
+        Name: pkg.Name
+      };
+    });
+
+    if (foundPackages.length === 0) {
+      reject({ status: 404, message: "No package found under this regex." });
     } else {
-      resolve();
+      resolve(foundPackages);
     }
   });
 }
@@ -193,7 +199,7 @@ exports.packageCreate = function(body, xAuthorization) {
       };
 
     // Return the Package object with status 201
-    resolve({ packageObj });
+    resolve({status: 201, packageObj});
 
     } catch (err) {
       reject({ status: 400, error: 'Authentication failed (e.g. AuthenticationToken invalid or does not exist)' });
@@ -354,7 +360,7 @@ exports.registryReset = function(xAuthorization) {
 
       //Delete all users from the user list
       UserHandler.deleteUsers(UserHandler.userList);
-      resolve({status: 201, packageObj});
+      resolve(200);
     } catch (err) {
       reject({ status: 400, error: 'There is missing field(s) in the AuthenticationToken or it is formed improperly.' });
       return;
