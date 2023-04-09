@@ -6,11 +6,9 @@ handlers:
 
 env_variables:
   NODE_ENV: production
+  PORT: 8080
 
 # Specify the directory where the app server script is located
 # In this example, the script is located in cow/app.js
 # Modify the path as necessary for your specific app
 entrypoint: node nodejs-server/index.js
-env_variables:
-  PORT: 8080
-
