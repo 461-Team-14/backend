@@ -1,10 +1,14 @@
-runtime: nodejs18
+runtime: nodejs14
+
 handlers:
-# Serve all static files with url ending with a file extension
-- url: /(.*\..+)$
-  static_files: nodejs-server/build/\1
-  upload: nodejs-server/build/(.*\..+)$
-# Catch all handler to index.html
-- url: /.*
-  static_files: nodejs-server/build/index.html
-  upload: nodejs-server/build/index.html
+  - url: /api/.*
+    script: auto
+
+env_variables:
+  NODE_ENV: production
+
+# Specify the directory where the app server script is located
+# In this example, the script is located in cow/app.js
+# Modify the path as necessary for your specific app
+entrypoint: node nodejs-server/index.js
+
