@@ -1,24 +1,20 @@
 'use strict';
 
 var utils = require('../utils/writer.js');
-var Default = require('../service/DefaultService.js');
+var Default = require('../service/DefaultService');
 
-let xAuthorization = '';
-
-module.exports.CreateAuthToken = function createAuthToken (req, res, next, body) {
+module.exports.createAuthToken = function createAuthToken (req, res, next, body) {
   Default.createAuthToken(body)
     .then(function (response) {
-      res.setHeader('X-Authorization', response.token);
       utils.writeJson(res, response);
     })
     .catch(function (response) {
-      utils.writeJson(res, response.status || 500, response);
+      utils.writeJson(res, response);
     });
 };
 
-module.exports.packageByNameDelete = function packageByNameDelete (req, res, next, name, xAuthorization) {
-  xAuthorization = req.headers['x-authorization']; // Assign token from request header to global variable
-  Default.packageByNameDelete(name, xAuthorization)
+module.exports.packageByNameDelete = function packageByNameDelete (req, res, next, xAuthorization, name) {
+  Default.packageByNameDelete(xAuthorization, name)
     .then(function (response) {
       utils.writeJson(res, response);
     })
@@ -28,7 +24,6 @@ module.exports.packageByNameDelete = function packageByNameDelete (req, res, nex
 };
 
 module.exports.packageByNameGet = function packageByNameGet (req, res, next, name, xAuthorization) {
-  xAuthorization = req.headers['x-authorization']; // Assign token from request header to global variable
   Default.packageByNameGet(name, xAuthorization)
     .then(function (response) {
       utils.writeJson(res, response);
@@ -38,8 +33,7 @@ module.exports.packageByNameGet = function packageByNameGet (req, res, next, nam
     });
 };
 
-module.exports.PackageByRegExGet = function packageByRegExGet (req, res, next, body, xAuthorization) {
-  xAuthorization = req.headers['x-authorization']; // Assign token from request header to global variable
+module.exports.packageByRegExGet = function packageByRegExGet (req, res, next, body, xAuthorization) {
   Default.packageByRegExGet(body, xAuthorization)
     .then(function (response) {
       utils.writeJson(res, response);
@@ -49,20 +43,18 @@ module.exports.PackageByRegExGet = function packageByRegExGet (req, res, next, b
     });
 };
 
-module.exports.PackageCreate = function packageCreate (req, res, next, body, xAuthorization) {
-  xAuthorization = req.headers['x-authorization']; // Assign token from request header to global variable
+module.exports.packageCreate = function packageCreate (req, res, next, body, xAuthorization) {
   Default.packageCreate(body, xAuthorization)
     .then(function (response) {
-      res.status(201).json(response);
+      utils.writeJson(res, response);
     })
     .catch(function (response) {
-      utils.writeJson(res, response.status || 500, response);
+      utils.writeJson(res, response);
     });
 };
 
-module.exports.packageDelete = function packageDelete (req, res, next, id, xAuthorization) {
-  xAuthorization = req.headers['x-authorization']; // Assign token from request header to global variable
-  Default.packageDelete(id, xAuthorization)
+module.exports.packageDelete = function packageDelete (req, res, next, xAuthorization, id) {
+  Default.packageDelete(xAuthorization, id)
     .then(function (response) {
       utils.writeJson(res, response);
     })
@@ -72,7 +64,6 @@ module.exports.packageDelete = function packageDelete (req, res, next, id, xAuth
 };
 
 module.exports.packageRate = function packageRate (req, res, next, id, xAuthorization) {
-  xAuthorization = req.headers['x-authorization']; // Assign token from request header to global variable
   Default.packageRate(id, xAuthorization)
     .then(function (response) {
       utils.writeJson(res, response);
@@ -82,9 +73,8 @@ module.exports.packageRate = function packageRate (req, res, next, id, xAuthoriz
     });
 };
 
-module.exports.packageRetrieve = function packageRetrieve (req, res, next, id, xAuthorization) {
-  xAuthorization = req.headers['x-authorization']; // Assign token from request header to global variable
-  Default.packageRetrieve(id, xAuthorization)
+module.exports.packageRetrieve = function packageRetrieve (req, res, next, xAuthorization, id) {
+  Default.packageRetrieve(xAuthorization, id)
     .then(function (response) {
       utils.writeJson(res, response);
     })
@@ -93,8 +83,7 @@ module.exports.packageRetrieve = function packageRetrieve (req, res, next, id, x
     });
 };
 
-module.exports.PackageUpdate = function packageUpdate (req, res, next, body, id, xAuthorization) {
-  xAuthorization = req.headers['x-authorization']; // Assign token from request header to global variable
+module.exports.packageUpdate = function packageUpdate (req, res, next, body, id, xAuthorization) {
   Default.packageUpdate(body, id, xAuthorization)
     .then(function (response) {
       utils.writeJson(res, response);
@@ -104,24 +93,22 @@ module.exports.PackageUpdate = function packageUpdate (req, res, next, body, id,
     });
 };
 
-module.exports.PackagesList = function packagesList (req, res, next, body, offset, xAuthorization) {
-  xAuthorization = req.headers['x-authorization']; // Assign token from request header to global variable
+module.exports.packagesList = function packagesList (req, res, next, body, offset, xAuthorization) {
   Default.packagesList(body, offset, xAuthorization)
     .then(function (response) {
       utils.writeJson(res, response);
     })
     .catch(function (response) {
-      utils.writeJson(res, response.status || 500, response);
+      utils.writeJson(res, response);
     });
 };
 
-module.exports.RegistryReset = function registryReset (req, res, next) {
-  xAuthorization = req.headers['x-authorization']; // Assign token from request header to global variable
+module.exports.registryReset = function registryReset (req, res, next, xAuthorization) {
   Default.registryReset(xAuthorization)
     .then(function (response) {
       utils.writeJson(res, response);
     })
     .catch(function (response) {
-      utils.writeJson(res, response.status || 500, response);
+      utils.writeJson(res, response);
     });
 };
