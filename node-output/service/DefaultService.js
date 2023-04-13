@@ -1,5 +1,7 @@
 'use strict';
-
+const jwt = require('jsonwebtoken');
+const UserHandler = require('./UserHandler');
+const PackageHandler = require('./PackageHandler');
 
 /**
  * Create an access token.
@@ -9,25 +11,56 @@
  **/
 exports.createAuthToken = function(body) {
   return new Promise(function(resolve, reject) {
-    var examples = {};
-    examples['application/json'] = "";
-    if (Object.keys(examples).length > 0) {
-      resolve(examples[Object.keys(examples)[0]]);
+    if (!body || !body.User || !body.Secret || !body.User.name || !body.Secret.password) {
+      reject({ status: 400, error: 'AuthenticationRequest is missing field(s) or is formed improperly.' });
+      return;
+    }
+
+    const { name, isAdmin } = body.User;
+    const { password } = body.Secret;
+
+    const user = UserHandler.userList.find(u => u.name === name && u.password === password);
+    if (!user) {
+      const addUserResult = UserHandler.addUser(name, isAdmin, password);
+      switch(addUserResult) {
+        case -1:
+          reject({ status: 400, error: 'AuthenticationRequest is missing field(s) or is formed improperly.' });
+          break;
+        case -2:
+          reject({ status: 401, error: 'The user or password is invalid.' });
+          break;
+        case 1:
+          const existingUser = UserHandler.userList.find(u => u.name === name && u.password === password);
+          if (existingUser.token) {
+            resolve({ token: existingUser.token });
+          } else {
+            const token = jwt.sign({ name, isAdmin }, 'secret');
+            existingUser.token = token;
+            resolve({ token });
+          }
+          break;
+      }
     } else {
-      resolve();
+      const existingUser = UserHandler.userList.find(u => u.name === name && u.password === password);
+      if (existingUser.token) {
+        resolve({ token: existingUser.token });
+      } else {
+        const token = jwt.sign({ name, isAdmin }, 'secret');
+        existingUser.token = token;
+        resolve({ token });
+      }
     }
   });
 }
 
-
 /**
  * Delete all versions of this package.
  *
- * xAuthorization AuthenticationToken 
  * name PackageName 
+ * xAuthorization AuthenticationToken  (optional)
  * no response value expected for this operation
  **/
-exports.packageByNameDelete = function(xAuthorization,name) {
+exports.packageByNameDelete = function(name,xAuthorization) {
   return new Promise(function(resolve, reject) {
     resolve();
   });
@@ -38,7 +71,7 @@ exports.packageByNameDelete = function(xAuthorization,name) {
  * Return the history of this package (all versions).
  *
  * name PackageName 
- * xAuthorization AuthenticationToken 
+ * xAuthorization AuthenticationToken  (optional)
  * returns List
  **/
 exports.packageByNameGet = function(name,xAuthorization) {
@@ -82,26 +115,33 @@ exports.packageByNameGet = function(name,xAuthorization) {
  * Get any packages fitting the regular expression.
  * Search for a package using regular expression over package names and READMEs. This is similar to search by name.
  *
- * body String 
- * xAuthorization AuthenticationToken 
+ * body PackageRegEx 
+ * xAuthorization AuthenticationToken  (optional)
  * returns List
  **/
-exports.packageByRegExGet = function(body,xAuthorization) {
+exports.packageByRegExGet = function(body, xAuthorization) {
   return new Promise(function(resolve, reject) {
-    var examples = {};
-    examples['application/json'] = [ {
-  "Version" : "1.2.3",
-  "ID" : "ID",
-  "Name" : "Name"
-}, {
-  "Version" : "1.2.3",
-  "ID" : "ID",
-  "Name" : "Name"
-} ];
-    if (Object.keys(examples).length > 0) {
-      resolve(examples[Object.keys(examples)[0]]);
+    if (!body) {
+      reject({ status: 400, message: "The regex field is missing in the PackageRegEx." });
+    }
+
+    //Filter the packageList array based on the regex provided
+    var filteredList = PackageHandler.packageList.filter(function(pkg) {
+      return (new RegExp(body, 'i')).test(pkg.Name) || (pkg.Readme && (new RegExp(body, 'i')).test(pkg.Readme));
+    });
+
+    //Create an array of package objects from the filteredList
+    var foundPackages = filteredList.map(function(pkg) {
+      return {
+        Version: pkg.Version,
+        Name: pkg.Name
+      };
+    });
+
+    if (foundPackages.length === 0) {
+      reject({ status: 404, message: "No package found under this regex." });
     } else {
-      resolve();
+      resolve(foundPackages);
     }
   });
 }
@@ -113,25 +153,57 @@ exports.packageByRegExGet = function(body,xAuthorization) {
  * xAuthorization AuthenticationToken 
  * returns Package
  **/
-exports.packageCreate = function(body,xAuthorization) {
+exports.packageCreate = function(body, xAuthorization) {
   return new Promise(function(resolve, reject) {
-    var examples = {};
-    examples['application/json'] = {
-  "metadata" : {
-    "Version" : "1.2.3",
-    "ID" : "ID",
-    "Name" : "Name"
-  },
-  "data" : {
-    "Content" : "Content",
-    "JSProgram" : "JSProgram",
-    "URL" : "URL"
-  }
-};
-    if (Object.keys(examples).length > 0) {
-      resolve(examples[Object.keys(examples)[0]]);
-    } else {
-      resolve();
+
+    //Validate inputs
+    if (!body || !body.Content || !body.JSProgram || !body.URL) {
+      reject({ status: 400, error: 'There is missing field(s) in the PackageData/AuthenticationToken or it is formed improperly.' });
+      return;
+    }
+
+    try {
+      let decoded = jwt.verify(xAuthorization, 'secret');
+      const user = UserHandler.userList.find(u => u.name === decoded.name && u.token === xAuthorization);
+      if (!user) {
+        //Only create package if user exists
+        reject({ status: 401, error: 'Authentication failed (e.g. AuthenticationToken invalid or does not exist)' });
+        return;
+      }
+
+      //Check if the package exists
+
+      /*IMPLEMENT LATER*/
+
+      // if (PackageHandler.packageList.includes(packageData.packageName)) {
+      //   reject({ status: 409, error: 'Package exists already.' });
+      //   return;
+      // }
+
+      //add the package to the list
+      //CALL FUNCTION
+      //PackageHandler.packageList.push(packageData.packageName);
+
+      // Construct the Package object
+      const packageObj = {
+        metadata: {
+          Version: "1.0.0",
+          ID: "underscore",
+          Name: "Underscore",
+          },
+        data: {
+          Content: body.Content,
+          JSProgram: body.JSProgram,
+          URL: body.URL,
+        },
+      };
+
+    // Return the Package object with status 201
+    resolve({status: 201, packageObj});
+
+    } catch (err) {
+      reject({ status: 400, error: 'Authentication failed (e.g. AuthenticationToken invalid or does not exist)' });
+      return;
     }
   });
 }
@@ -140,11 +212,11 @@ exports.packageCreate = function(body,xAuthorization) {
 /**
  * Delete this version of the package.
  *
- * xAuthorization AuthenticationToken 
  * id PackageID Package ID
+ * xAuthorization AuthenticationToken  (optional)
  * no response value expected for this operation
  **/
-exports.packageDelete = function(xAuthorization,id) {
+exports.packageDelete = function(id,xAuthorization) {
   return new Promise(function(resolve, reject) {
     resolve();
   });
@@ -154,7 +226,7 @@ exports.packageDelete = function(xAuthorization,id) {
 /**
  *
  * id PackageID 
- * xAuthorization AuthenticationToken 
+ * xAuthorization AuthenticationToken  (optional)
  * returns PackageRating
  **/
 exports.packageRate = function(id,xAuthorization) {
@@ -162,8 +234,6 @@ exports.packageRate = function(id,xAuthorization) {
     var examples = {};
     examples['application/json'] = {
   "GoodPinningPractice" : 2.3021358869347655,
-  "NetScore" : 9.301444243932576,
-  "PullRequest" : 7.061401241503109,
   "ResponsiveMaintainer" : 5.962133916683182,
   "LicenseScore" : 5.637376656633329,
   "RampUp" : 1.4658129805029452,
@@ -183,11 +253,11 @@ exports.packageRate = function(id,xAuthorization) {
  * Interact with the package with this ID
  * Return this package.
  *
- * xAuthorization AuthenticationToken 
  * id PackageID ID of package to fetch
+ * xAuthorization AuthenticationToken  (optional)
  * returns Package
  **/
-exports.packageRetrieve = function(xAuthorization,id) {
+exports.packageRetrieve = function(id,xAuthorization) {
   return new Promise(function(resolve, reject) {
     var examples = {};
     examples['application/json'] = {
@@ -217,7 +287,7 @@ exports.packageRetrieve = function(xAuthorization,id) {
  *
  * body Package 
  * id PackageID 
- * xAuthorization AuthenticationToken 
+ * xAuthorization AuthenticationToken  (optional)
  * no response value expected for this operation
  **/
 exports.packageUpdate = function(body,id,xAuthorization) {
@@ -233,21 +303,28 @@ exports.packageUpdate = function(body,id,xAuthorization) {
  *
  * body List 
  * offset EnumerateOffset Provide this for pagination. If not provided, returns the first page of results. (optional)
- * xAuthorization AuthenticationToken 
+ * xAuthorization AuthenticationToken  (optional)
  * returns List
  **/
 exports.packagesList = function(body,offset,xAuthorization) {
   return new Promise(function(resolve, reject) {
+
+    //Parse the body and extract the package queries
+    const queries = body.map((query) => ({
+      name: query.Name,
+      version: query.Version,
+    }));
+
     var examples = {};
     examples['application/json'] = [ {
-  "Version" : "1.2.3",
-  "ID" : "ID",
-  "Name" : "Name"
-}, {
-  "Version" : "1.2.3",
-  "ID" : "ID",
-  "Name" : "Name"
-} ];
+      "Version" : "1.2.3",
+      "ID" : "ID",
+      "Name" : "Name"
+    }, {
+      "Version" : "1.2.3",
+      "ID" : "ID",
+      "Name" : "Name"
+    } ];
     if (Object.keys(examples).length > 0) {
       resolve(examples[Object.keys(examples)[0]]);
     } else {
@@ -261,12 +338,32 @@ exports.packagesList = function(body,offset,xAuthorization) {
  * Reset the registry
  * Reset the registry to a system default state.
  *
- * xAuthorization AuthenticationToken 
+ * xAuthorization AuthenticationToken  (optional)
  * no response value expected for this operation
  **/
 exports.registryReset = function(xAuthorization) {
   return new Promise(function(resolve, reject) {
-    resolve();
-  });
-}
+    // Check if xAuthorization is present and valid
+    if (!xAuthorization) {
+      reject({ status: 400, error: 'There is missing field(s) in the AuthenticationToken or it is formed improperly.' });
+      return;
+    }
 
+    try {
+      let decoded = jwt.verify(xAuthorization, 'secret');
+      const user = UserHandler.userList.find(u => u.name === decoded.name && u.token === xAuthorization);
+      if (!user || !user.isAdmin) {
+        //Only reset registry if user exists and is an admin
+        reject({ status: 401, error: 'You do not have permission to reset the registry.' });
+        return;
+      }
+
+      //Delete all users from the user list
+      UserHandler.deleteUsers(UserHandler.userList);
+      resolve(200);
+    } catch (err) {
+      reject({ status: 400, error: 'There is missing field(s) in the AuthenticationToken or it is formed improperly.' });
+      return;
+    }
+  });
+};
