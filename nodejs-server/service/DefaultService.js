@@ -121,13 +121,14 @@ exports.packageByNameGet = function(name,xAuthorization) {
  **/
 exports.packageByRegExGet = function(body, xAuthorization) {
   return new Promise(function(resolve, reject) {
-    if (!body) {
-      reject({ status: 400, message: "The regex field is missing in the PackageRegEx." });
+    if (!body.RegEx) {
+      reject({ status: 400, error: "The regex field is missing in the PackageRegEx." });
+      return;
     }
 
     //Filter the packageList array based on the regex provided
     var filteredList = PackageHandler.packageList.filter(function(pkg) {
-      return (new RegExp(body, 'i')).test(pkg.Name) || (pkg.Readme && (new RegExp(body, 'i')).test(pkg.Readme));
+      return (new RegExp(body.RegEx, 'i')).test(pkg.Name) || (pkg.Readme && (new RegExp(body.RegEx, 'i')).test(pkg.Readme));
     });
 
     //Create an array of package objects from the filteredList
@@ -139,9 +140,10 @@ exports.packageByRegExGet = function(body, xAuthorization) {
     });
 
     if (foundPackages.length === 0) {
-      reject({ status: 404, message: "No package found under this regex." });
+      reject({ status: 404, error: "No package found under this regex." });
+      return;
     } else {
-      resolve(foundPackages);
+      return resolve(foundPackages);
     }
   });
 }
