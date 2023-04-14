@@ -121,14 +121,14 @@ exports.packageByNameGet = function(name,xAuthorization) {
  **/
 exports.packageByRegExGet = function(body, xAuthorization) {
   return new Promise(function(resolve, reject) {
-    if (!body) {
+    if (!body.RegEx) {
       reject({ status: 400, error: "The regex field is missing in the PackageRegEx." });
       return;
     }
 
     //Filter the packageList array based on the regex provided
     var filteredList = PackageHandler.packageList.filter(function(pkg) {
-      return (new RegExp(body, 'i')).test(pkg.Name) || (pkg.Readme && (new RegExp(body, 'i')).test(pkg.Readme));
+      return (new RegExp(body.RegEx, 'i')).test(pkg.Name) || (pkg.Readme && (new RegExp(body.RegEx, 'i')).test(pkg.Readme));
     });
 
     //Create an array of package objects from the filteredList
