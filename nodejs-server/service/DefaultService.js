@@ -233,6 +233,8 @@ exports.packageDelete = function(id,xAuthorization) {
  **/
 exports.packageRate = function(id,xAuthorization) {
   return new Promise(function(resolve, reject) {
+    //url =
+     
     var examples = {};
     examples['application/json'] = {
   "GoodPinningPractice" : 2.3021358869347655,

@@ -71,9 +71,9 @@ module.exports.packageDelete = function packageDelete (req, res, next, id, xAuth
     });
 };
 
-module.exports.packageRate = function packageRate (req, res, next, id, xAuthorization) {
+module.exports.PackageRate = function PackageRate (req, res, next, id, xAuthorization) {
   xAuthorization = req.headers['x-authorization']; // Assign token from request header to global variable
-  Default.packageRate(id, xAuthorization)
+  Default.PackageRate(id, xAuthorization)
     .then(function (response) {
       utils.writeJson(res, response);
     })
