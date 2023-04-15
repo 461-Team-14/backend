@@ -2,7 +2,7 @@
 const jwt = require('jsonwebtoken');
 const UserHandler = require('./UserHandler');
 const PackageHandler = require('./PackageHandler');
-
+const ratePackages = require('../../Part2/tsrc/recentmain')
 /**
  * Create an access token.
  *
@@ -233,8 +233,11 @@ exports.packageDelete = function(id,xAuthorization) {
  **/
 exports.packageRate = function(id,xAuthorization) {
   return new Promise(function(resolve, reject) {
-    //url =
-     
+
+    url = "https//github.com/nullivex/nodist";
+    ratePackageInput(url);
+
+
     var examples = {};
     examples['application/json'] = {
   "GoodPinningPractice" : 2.3021358869347655,
