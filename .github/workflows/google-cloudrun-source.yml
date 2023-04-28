@@ -2,10 +2,10 @@ name: Deploy to Cloud Run from Source
 
 on:
   push:
-    branches: [ "master", "main", "cicd"]
+    branches: [ "master", "main", "delete"]
 
 env:
-  PROJECT_ID: projectteam14 # TODO: update Google Cloud project id
+  PROJECT_ID: backend-382721 # TODO: update Google Cloud project id
   SERVICE: githubactions # TODO: update Cloud Run service name
   REGION: us-east1 # TODO: update Cloud Run service region
 
@@ -21,17 +21,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-
-      - name: Setup Node.js (NPM)
-        uses: actions/setup-node@master
-        with:
-          node-version: '18.x'
-
-      - name: Build Development
-        run: cd my-react-app; npm install
-
-      - name: Build Development
-        run: cd my-react-app; npm run build
 
       - name: Google Auth
         id: auth

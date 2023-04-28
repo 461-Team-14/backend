@@ -1,11 +1,6 @@
-# cloudbuild.yaml
 steps:
-- name: node:10.15.1
-  entrypoint: npm
-  args: ["install"]
-- name: node:10.15.1
-  entrypoint: npm
-  args: ["run", "build"]
-- name: "gcr.io/cloud-builders/gcloud"
-  args: ["app", "deploy"]
-timeout: "1600s"
+  - name: python3
+    entrypoint: pip3
+    args: ["install", "-r", "pythonrequirements.txt"]
+  - name: "gcr.io/cloud-builders/gcloud"
+    args: ["app", "deploy"]
