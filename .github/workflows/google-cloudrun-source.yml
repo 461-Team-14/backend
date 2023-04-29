@@ -1,0 +1,30 @@
+name: Deploy to Cloud Run from Source
+
+on:
+  push:
+    branches: [ "master", "main", "delete"]
+
+env:
+  PROJECT_ID: backend-382721 # TODO: update Google Cloud project id
+  SERVICE: githubactions # TODO: update Cloud Run service name
+  REGION: us-east1 # TODO: update Cloud Run service region
+
+jobs:
+  job_id:
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+
+    steps:
+    - id: 'auth'
+      uses: 'google-github-actions/auth@v1'
+      with:
+        workload_identity_provider: 'projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider'
+        service_account: 'my-service-account@my-project.iam.gserviceaccount.com'
+
+    - id: 'deploy'
+      uses: 'google-github-actions/deploy-appengine@v1'
+
+    # Example of using the output
+    - id: 'test'
+      run: 'curl "${{ steps.deploy.outputs.url }}"'
