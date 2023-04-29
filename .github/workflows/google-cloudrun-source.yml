@@ -16,14 +16,16 @@ jobs:
       id-token: 'write'
     runs-on: ubuntu-latest
     steps:
-    - id: 'auth'
-      uses: 'google-github-actions/auth@v1'
-      with:
-        workload_identity_provider: 'projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider'
-        service_account: 'my-service-account@my-project.iam.gserviceaccount.com'
-
-    - id: 'deploy'
-      uses: 'google-github-actions/deploy-appengine@v1'
+    - name: Checkout
+        uses: actions/checkout@v2
+      - name: Google App Engine
+        uses: google-github-actions/deploy-appengine@v0.4.0
+        with:
+          project_id: PROJECT_ID
+          version: master
+          credentials: ${{secrets.JSON_CRED}}
+          flags: --no-cache
+          deliverables: app.yaml
 
     # Example of using the output
     - id: 'test'
