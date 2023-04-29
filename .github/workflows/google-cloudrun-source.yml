@@ -1,32 +1,22 @@
-name: Deploy to Cloud Run from Source
+name: Deployment
 
 on:
   push:
-    branches: [ "master", "main", "delete"]
-
-env:
-  PROJECT_ID: backend-382721 # TODO: update Google Cloud project id
-  SERVICE: githubactions # TODO: update Cloud Run service name
-  REGION: us-east1 # TODO: update Cloud Run service region
-
+    branches:
+    - delete
+  
 jobs:
-  job_id:
-    permissions:
-      contents: 'read'
-      id-token: 'write'
+  deploy:
+    name: Deploy to App Engine
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout
+      - name: Checkout
         uses: actions/checkout@v2
       - name: Google App Engine
         uses: google-github-actions/deploy-appengine@v0.4.0
         with:
-          project_id: PROJECT_ID
+          project_id: backend-382721
           version: master
           credentials: ${{secrets.JSON_CRED}}
           flags: --no-cache
           deliverables: app.yaml
-
-    # Example of using the output
-    - id: 'test'
-      run: 'curl "${{ steps.deploy.outputs.url }}"'
