@@ -1,5 +1,6 @@
 
 python3 -m venv env;
 source env/bin/activate;
-pip install -r pythonrequirements.txt;
+pip3 install -r requirements.txt;
 python3 main.py;
+Tiny change by Sammy D 2
