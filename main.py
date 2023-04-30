@@ -60,10 +60,10 @@ def root():
         'index.html',
         user_data=claims, error_message=error_message, times=times)
 
-@app.route('/hello', methods=['PUT'])
+@app.route('/hello', methods=['GET'])
 def hello():
-    name = request.args.get('name')
-    return f"Hello, {name}!" if name else "Hello, World!"
+    # name = request.args.get('name')
+    return render_template('hello.html')
 
 if __name__ == '__main__':
     # This is used when running locally only. When deploying to Google App
