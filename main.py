@@ -29,7 +29,6 @@ def fetch_times(email, limit):
     return times
 
 
-
 firebase_request_adapter = requests.Request()
 @app.route('/')
 def root():
@@ -60,6 +59,11 @@ def root():
     return render_template(
         'index.html',
         user_data=claims, error_message=error_message, times=times)
+
+@app.route('/hello', methods=['GET'])
+def hello():
+    # name = request.args.get('name')
+    return render_template('hello.html')
 
 if __name__ == '__main__':
     # This is used when running locally only. When deploying to Google App
