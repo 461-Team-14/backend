@@ -4,6 +4,7 @@ on:
   push:
     branches:
     - delete
+    - main
   
 jobs:
   deploy:
